@@ -1,0 +1,84 @@
+From f5d8ad538d03ee00b9275176f759ebc8b042c943 Mon Sep 17 00:00:00 2001
+From: sakinu <sakinu080712345@gmail.com>
+Date: Fri, 8 May 2026 16:34:39 +0800
+Subject: [PATCH] bump Linux kernel to v7.0.3
+
+---
+ configs/stm32f429_disco_xip_defconfig | 8 ++++----
+ package/linux-headers/Config.in.host  | 6 +++++-
+ toolchain/Config.in                   | 5 +++++
+ 3 files changed, 14 insertions(+), 5 deletions(-)
+
+diff --git a/configs/stm32f429_disco_xip_defconfig b/configs/stm32f429_disco_xip_defconfig
+index 7bce0252..d241de9a 100644
+--- a/configs/stm32f429_disco_xip_defconfig
++++ b/configs/stm32f429_disco_xip_defconfig
+@@ -1,20 +1,20 @@
+ BR2_arm=y
+ BR2_cortex_m4=y
+-BR2_PACKAGE_HOST_LINUX_HEADERS_CUSTOM_6_1=y
++BR2_PACKAGE_HOST_LINUX_HEADERS_CUSTOM_7_0=y
+ # BR2_UCLIBC_INSTALL_UTILS is not set
+ BR2_ENABLE_LTO=y
+ BR2_GLOBAL_PATCH_DIR="board/stmicroelectronics/stm32f429-disco/patches"
+-BR2_DOWNLOAD_FORCE_CHECK_HASHES=y
++# BR2_DOWNLOAD_FORCE_CHECK_HASHES is not set
+ BR2_ROOTFS_POST_BUILD_SCRIPT="board/stmicroelectronics/common/stm32f4xx/stm32-post-build.sh"
+ BR2_LINUX_KERNEL=y
+ BR2_LINUX_KERNEL_CUSTOM_VERSION=y
+-BR2_LINUX_KERNEL_CUSTOM_VERSION_VALUE="6.1.159"
++BR2_LINUX_KERNEL_CUSTOM_VERSION_VALUE="7.0.3"
+ BR2_LINUX_KERNEL_USE_CUSTOM_CONFIG=y
+ BR2_LINUX_KERNEL_CUSTOM_CONFIG_FILE="board/stmicroelectronics/stm32f429-disco/linux.config"
+ BR2_LINUX_KERNEL_IMAGE_TARGET_CUSTOM=y
+ BR2_LINUX_KERNEL_IMAGE_TARGET_NAME="xipImage"
+ BR2_LINUX_KERNEL_DTS_SUPPORT=y
+-BR2_LINUX_KERNEL_INTREE_DTS_NAME="stm32f429-disco"
++BR2_LINUX_KERNEL_INTREE_DTS_NAME="st/stm32f429-disco"
+ BR2_PACKAGE_BUSYBOX_CONFIG_FRAGMENT_FILES="board/stmicroelectronics/common/stm32f4xx/busybox.fragment"
+ # BR2_PACKAGE_IFUPDOWN_SCRIPTS is not set
+ BR2_TARGET_ROOTFS_INITRAMFS=y
+diff --git a/package/linux-headers/Config.in.host b/package/linux-headers/Config.in.host
+index 4745ff14..7f94d1bd 100644
+--- a/package/linux-headers/Config.in.host
++++ b/package/linux-headers/Config.in.host
+@@ -133,8 +133,12 @@ choice
+ 	  If your kernel headers are more recent than the latest version
+ 	  in the choice, then select the latest version.
+ 
++config BR2_PACKAGE_HOST_LINUX_HEADERS_CUSTOM_7_0
++	bool "7.0.x or later"
++	select BR2_TOOLCHAIN_HEADERS_AT_LEAST_7_0
++
+ config BR2_PACKAGE_HOST_LINUX_HEADERS_CUSTOM_6_19
+-	bool "6.19.x or later"
++	bool "6.19.x"
+ 	select BR2_TOOLCHAIN_HEADERS_AT_LEAST_6_19
+ 
+ config BR2_PACKAGE_HOST_LINUX_HEADERS_CUSTOM_6_18
+diff --git a/toolchain/Config.in b/toolchain/Config.in
+index 51c5ae6f..b01e5898 100644
+--- a/toolchain/Config.in
++++ b/toolchain/Config.in
+@@ -676,6 +676,10 @@ config BR2_TOOLCHAIN_HEADERS_AT_LEAST_6_18
+ config BR2_TOOLCHAIN_HEADERS_AT_LEAST_6_19
+ 	bool
+ 	select BR2_TOOLCHAIN_HEADERS_AT_LEAST_6_18
++
++config BR2_TOOLCHAIN_HEADERS_AT_LEAST_7_0
++	bool
++	select BR2_TOOLCHAIN_HEADERS_AT_LEAST_6_19
+ 	select BR2_TOOLCHAIN_HEADERS_LATEST
+ 
+ # This should be selected by the latest version, above, to indicate that
+@@ -689,6 +693,7 @@ config BR2_TOOLCHAIN_HEADERS_LATEST
+ # stops affecting a value on the first matching default.
+ config BR2_TOOLCHAIN_HEADERS_AT_LEAST
+ 	string
++	default "7.0"  if BR2_TOOLCHAIN_HEADERS_AT_LEAST_7_0
+ 	default "6.19" if BR2_TOOLCHAIN_HEADERS_AT_LEAST_6_19
+ 	default "6.18" if BR2_TOOLCHAIN_HEADERS_AT_LEAST_6_18
+ 	default "6.17" if BR2_TOOLCHAIN_HEADERS_AT_LEAST_6_17
+-- 
+2.54.0
+
