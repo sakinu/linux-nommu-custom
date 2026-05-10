@@ -2,6 +2,21 @@
 
 PROJECT_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST)))..)
 
+build-linux:
+	@echo "Rebuilding Linux and afboot-stm32..."
+
+	@$(MAKE) -C $(PROJECT_DIR)/buildroot-2026.02-rc2 linux-rebuild
+	@$(MAKE) -C $(PROJECT_DIR)/buildroot-2026.02-rc2 afboot-stm32-rebuild
+
+build-run:
+	@echo "Rebuilding Linux and afboot-stm32..."
+
+	@$(MAKE) -C $(PROJECT_DIR)/buildroot-2026.02-rc2 linux-rebuild
+	@$(MAKE) -C $(PROJECT_DIR)/buildroot-2026.02-rc2 afboot-stm32-rebuild
+
+	@echo "Running stm32 target..."
+	@$(MAKE) stm32
+
 qemu:
 	@echo "Run qemu command"
 
