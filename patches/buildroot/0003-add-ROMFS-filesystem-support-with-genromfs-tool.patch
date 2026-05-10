@@ -1,20 +1,21 @@
-From 89052b91d181293b244b478b0f05a1879864aec3 Mon Sep 17 00:00:00 2001
+From 49f8a1f7272f74cbae5d279eceec47161ff6a57e Mon Sep 17 00:00:00 2001
 From: sakinu <sakinu080712345@gmail.com>
 Date: Sat, 9 May 2026 21:44:05 +0800
 Subject: [PATCH 3/3] add ROMFS filesystem support with genromfs tool
 
 ---
- Config.in.legacy                         | 12 ---------
- configs/stm32f429_disco_xip_defconfig    |  2 +-
- fs/Config.in                             |  1 +
- fs/romfs/Config.in                       |  4 +++
- fs/romfs/romfs.mk                        | 13 +++++++++
- package/genromfs/0001-build-system.patch | 26 ++++++++++++++++++
- package/genromfs/Config.in               |  4 +++
- package/genromfs/Config.in.host          |  4 +++
- package/genromfs/genromfs.hash           |  3 +++
- package/genromfs/genromfs.mk             | 34 ++++++++++++++++++++++++
- 10 files changed, 90 insertions(+), 13 deletions(-)
+ Config.in.legacy                              | 12 -------
+ .../stm32f429-disco/flash.sh                  |  4 +--
+ configs/stm32f429_disco_xip_defconfig         |  2 +-
+ fs/Config.in                                  |  1 +
+ fs/romfs/Config.in                            |  4 +++
+ fs/romfs/romfs.mk                             | 13 +++++++
+ package/genromfs/0001-build-system.patch      | 26 ++++++++++++++
+ package/genromfs/Config.in                    |  4 +++
+ package/genromfs/Config.in.host               |  4 +++
+ package/genromfs/genromfs.hash                |  3 ++
+ package/genromfs/genromfs.mk                  | 34 +++++++++++++++++++
+ 11 files changed, 92 insertions(+), 15 deletions(-)
  create mode 100644 fs/romfs/Config.in
  create mode 100644 fs/romfs/romfs.mk
  create mode 100644 package/genromfs/0001-build-system.patch
@@ -46,6 +47,25 @@ index a2a7b06a..8a250233 100644
  config BR2_BINUTILS_VERSION_2_41_X
  	bool "binutils 2.41 has been removed"
  	select BR2_LEGACY
+diff --git a/board/stmicroelectronics/stm32f429-disco/flash.sh b/board/stmicroelectronics/stm32f429-disco/flash.sh
+index 2d373c89..fc5fa1b9 100755
+--- a/board/stmicroelectronics/stm32f429-disco/flash.sh
++++ b/board/stmicroelectronics/stm32f429-disco/flash.sh
+@@ -19,12 +19,12 @@ BOOTLOADER_ADDR=0x08000000
+ DTB_ADDR=0x08004000
+ XIP_ADDR=0x0800C000
+ ROOTFS_ADDR=0x08180000
+-FLASH_END_ADDR=0x081FFFFF
++FLASH_END_ADDR=0x08200000
+ 
+ BOOTLOADER="${OUTPUT_DIR}/images/stm32f429i-disco.bin"
+ DTB="${OUTPUT_DIR}/images/stm32f429-disco.dtb"
+ XIP="${OUTPUT_DIR}/images/xipImage"
+-ROOTFS="${OUTPUT_DIR}/images/rootfs.cpio"
++ROOTFS="${OUTPUT_DIR}/images/rootfs.romfs"
+ 
+ # Check file existence
+ for f in "$BOOTLOADER" "$DTB" "$XIP" "$ROOTFS" ; do
 diff --git a/configs/stm32f429_disco_xip_defconfig b/configs/stm32f429_disco_xip_defconfig
 index bdb0bf3d..435cdb18 100644
 --- a/configs/stm32f429_disco_xip_defconfig
