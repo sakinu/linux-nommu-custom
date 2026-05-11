@@ -1,7 +1,7 @@
 From e955abd6ccae6178e2c870c569db8e8f34847ff1 Mon Sep 17 00:00:00 2001
 From: sakinu <sakinu080712345@gmail.com>
 Date: Sat, 9 May 2026 07:39:09 +0800
-Subject: [PATCH 2/3] add flash region overlap validation in flash script
+Subject: [PATCH 2/4] add flash region overlap validation in flash script
 
 ---
  .../stm32f429-disco/flash.sh                  | 62 +++++++++++++++++--

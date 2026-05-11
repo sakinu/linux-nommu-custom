@@ -2,14 +2,27 @@
 
 PROJECT_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST)))..)
 
-build-linux:
-	@echo "Rebuilding Linux and afboot-stm32..."
+stm32:
+	@echo "Build stm32"
+	$(PROJECT_DIR)/buildroot-2026.02-rc2/board/stmicroelectronics/stm32f429-disco/flash.sh $(PROJECT_DIR)/buildroot-2026.02-rc2/output stm32f429discovery
 
+linux-rebuild:
+	@echo "Rebuilding Linux"
 	@$(MAKE) -C $(PROJECT_DIR)/buildroot-2026.02-rc2 linux-rebuild
+
+dtb:
+	@echo "Rebuilding Linux and afboot-stm32"
 	@$(MAKE) -C $(PROJECT_DIR)/buildroot-2026.02-rc2 afboot-stm32-rebuild
 
-build-run:
-	@$(MAKE) build-linux
+linux-dtb:
+	@$(MAKE) linux-rebuild
+	@$(MAKE) dtb
+
+all:
+	@echo "Rebuilding Linux and afboot-stm32 and stm32"
+
+	@$(MAKE) linux-rebuild
+	@$(MAKE) dtb
 	@$(MAKE) stm32
 
 sd-card:
@@ -69,7 +82,3 @@ qemu:
 		-device loader,file=$$XIP,addr=$$XIP_ADDR \
 		-device loader,file=$$ROOTFS,addr=$$ROOTFS_ADDR \
 		-s
-
-stm32:
-	@echo "Build stm32"
-	$(PROJECT_DIR)/buildroot-2026.02-rc2/board/stmicroelectronics/stm32f429-disco/flash.sh $(PROJECT_DIR)/buildroot-2026.02-rc2/output stm32f429discovery

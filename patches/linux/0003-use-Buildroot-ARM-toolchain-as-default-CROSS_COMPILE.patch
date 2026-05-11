@@ -1,7 +1,7 @@
 From 2f7f126168df27069c8ff265f3278bd8c29e1ca2 Mon Sep 17 00:00:00 2001
 From: sakinu <sakinu080712345@gmail.com>
 Date: Mon, 11 May 2026 05:15:39 +0800
-Subject: [PATCH 3/3] use Buildroot ARM toolchain as default CROSS_COMPILE
+Subject: [PATCH 3/4] use Buildroot ARM toolchain as default CROSS_COMPILE
 
 ---
  Makefile | 4 ++++

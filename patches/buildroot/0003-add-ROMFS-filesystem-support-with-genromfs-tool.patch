@@ -1,7 +1,7 @@
 From 49f8a1f7272f74cbae5d279eceec47161ff6a57e Mon Sep 17 00:00:00 2001
 From: sakinu <sakinu080712345@gmail.com>
 Date: Sat, 9 May 2026 21:44:05 +0800
-Subject: [PATCH 3/3] add ROMFS filesystem support with genromfs tool
+Subject: [PATCH 3/4] add ROMFS filesystem support with genromfs tool
 
 ---
  Config.in.legacy                              | 12 -------

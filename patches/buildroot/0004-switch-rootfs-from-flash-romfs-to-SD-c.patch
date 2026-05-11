@@ -1,0 +1,118 @@
+From 3d1efdd95eda23706dc288d3ec846445732b3d61 Mon Sep 17 00:00:00 2001
+From: sakinu <sakinu080712345@gmail.com>
+Date: Tue, 12 May 2026 04:27:06 +0800
+Subject: [PATCH 4/4] switch rootfs from flash romfs to SD c ard ext2
+
+---
+ .../stm32f429-disco/flash.sh                  | 68 +++++++++++++------
+ configs/stm32f429_disco_xip_defconfig         |  1 +
+ 2 files changed, 47 insertions(+), 22 deletions(-)
+
+diff --git a/board/stmicroelectronics/stm32f429-disco/flash.sh b/board/stmicroelectronics/stm32f429-disco/flash.sh
+index fc5fa1b9..813cd181 100755
+--- a/board/stmicroelectronics/stm32f429-disco/flash.sh
++++ b/board/stmicroelectronics/stm32f429-disco/flash.sh
+@@ -3,6 +3,8 @@
+ OUTPUT_DIR=$1
+ BOARD_NAME=${2:-stm32f429discovery}
+ 
++ROOTFS_IN_FLASH=0
++
+ if ! test -d "${OUTPUT_DIR}" ; then
+     echo "ERROR: no output directory specified."
+     echo "Usage: $0 OUTPUT_DIR BOARD_NAME"
+@@ -47,34 +49,56 @@ rootfs_end=$((ROOTFS_ADDR + rootfs_size))
+ echo "BOOTLOADER:     $(printf '0x%08X' $BOOTLOADER_ADDR) -> $(printf '0x%08X' $bootloader_end) (size $bootloader_size)"
+ echo "DTB:     $(printf '0x%08X' $DTB_ADDR) -> $(printf '0x%08X' $dtb_end) (size $dtb_size)"
+ echo "XIP:     $(printf '0x%08X' $XIP_ADDR) -> $(printf '0x%08X' $xip_end) (size $xip_size)"
+-echo "ROOTFS:  $(printf '0x%08X' $ROOTFS_ADDR) -> $(printf '0x%08X' $rootfs_end) (size $rootfs_size)"
++if ((ROOTFS_IN_FLASH)); then
++    echo "ROOTFS:  $(printf '0x%08X' $ROOTFS_ADDR) -> $(printf '0x%08X' $rootfs_end) (size $rootfs_size)"
++fi
+ 
+-if [ "$bootloader_end" -gt "$DTB_ADDR" ]; then
++if (( bootloader_end > DTB_ADDR )); then
+     echo "ERROR: BOOTLOADER overlaps DTB"
+     exit 1
+ fi
+-if [ "$dtb_end" -gt "$XIP_ADDR" ]; then
++if (( dtb_end > XIP_ADDR )); then
+     echo "ERROR: DTB overlaps XIP"
+     exit 1
+ fi
+-if [ "$xip_end" -gt "$ROOTFS_ADDR" ]; then
+-    echo "ERROR: XIP overlaps ROOTFS"
+-    exit 1
+-fi
+-if [ "$rootfs_end" -gt "$FLASH_END_ADDR" ]; then
+-    echo "ERROR: ROOTFS overlaps FLASH_END"
+-    exit 1
++if ((ROOTFS_IN_FLASH)); then
++    if (( xip_end > ROOTFS_ADDR )); then
++        echo "ERROR: XIP overlaps ROOTFS"
++        exit 1
++    fi
++    if (( rootfs_end > FLASH_END_ADDR )); then
++        echo "ERROR: ROOTFS overlaps FLASH_END"
++        exit 1
++    fi
++else
++    if (( xip_end > FLASH_END_ADDR )); then
++        echo "ERROR: XIP overlaps FLASH_END"
++        exit 1
++    fi
+ fi
+-echo "OK: No overlap detected"
+ 
+-"${OUTPUT_DIR}/host/bin/openocd" -f "board/${BOARD_NAME}.cfg" \
+-  -c "init" \
+-  -c "reset init" \
+-  -c "flash probe 0" \
+-  -c "flash info 0" \
+-  -c "flash write_image erase ${BOOTLOADER} ${FLASH_BASE}" \
+-  -c "flash write_image erase ${DTB} ${DTB_ADDR}" \
+-  -c "flash write_image erase ${XIP} ${XIP_ADDR}" \
+-  -c "flash write_image erase ${ROOTFS} ${ROOTFS_ADDR}" \
+-  -c "reset run" \
+-  -c "shutdown"
++
++if ((ROOTFS_IN_FLASH)); then
++    "${OUTPUT_DIR}/host/bin/openocd" -f "board/${BOARD_NAME}.cfg" \
++    -c "init" \
++    -c "reset init" \
++    -c "flash probe 0" \
++    -c "flash info 0" \
++    -c "flash write_image erase ${BOOTLOADER} ${FLASH_BASE}" \
++    -c "flash write_image erase ${DTB} ${DTB_ADDR}" \
++    -c "flash write_image erase ${XIP} ${XIP_ADDR}" \
++    -c "flash write_image erase ${ROOTFS} ${ROOTFS_ADDR}" \
++    -c "reset run" \
++      -c "shutdown"
++else
++    "${OUTPUT_DIR}/host/bin/openocd" -f "board/${BOARD_NAME}.cfg" \
++    -c "init" \
++    -c "reset init" \
++    -c "flash probe 0" \
++    -c "flash info 0" \
++    -c "flash write_image erase ${BOOTLOADER} ${FLASH_BASE}" \
++    -c "flash write_image erase ${DTB} ${DTB_ADDR}" \
++    -c "flash write_image erase ${XIP} ${XIP_ADDR}" \
++    -c "reset run" \
++    -c "shutdown"
++fi
+\ No newline at end of file
+diff --git a/configs/stm32f429_disco_xip_defconfig b/configs/stm32f429_disco_xip_defconfig
+index 435cdb18..1ae3f2d7 100644
+--- a/configs/stm32f429_disco_xip_defconfig
++++ b/configs/stm32f429_disco_xip_defconfig
+@@ -16,6 +16,7 @@ BR2_LINUX_KERNEL_DTS_SUPPORT=y
+ BR2_LINUX_KERNEL_INTREE_DTS_NAME="st/stm32f429-disco"
+ BR2_PACKAGE_BUSYBOX_CONFIG_FRAGMENT_FILES="board/stmicroelectronics/common/stm32f4xx/busybox.fragment"
+ # BR2_PACKAGE_IFUPDOWN_SCRIPTS is not set
++BR2_TARGET_ROOTFS_EXT2=y
+ BR2_TARGET_ROOTFS_ROMFS=y
+ # BR2_TARGET_ROOTFS_TAR is not set
+ BR2_TARGET_AFBOOT_STM32=y
+-- 
+2.54.0
+

@@ -1,0 +1,39 @@
+From f795441b56c7b4f82f6e9390891800e6654a6f06 Mon Sep 17 00:00:00 2001
+From: sakinu <sakinu080712345@gmail.com>
+Date: Tue, 12 May 2026 04:22:40 +0800
+Subject: [PATCH 4/4] switch rootfs from flash romfs to SD card ext2
+
+---
+ arch/arm/boot/dts/st/stm32f429-disco.dts | 13 +------------
+ 1 file changed, 1 insertion(+), 12 deletions(-)
+
+diff --git a/arch/arm/boot/dts/st/stm32f429-disco.dts b/arch/arm/boot/dts/st/stm32f429-disco.dts
+index ee3d6f583..b972446ce 100644
+--- a/arch/arm/boot/dts/st/stm32f429-disco.dts
++++ b/arch/arm/boot/dts/st/stm32f429-disco.dts
+@@ -58,21 +58,10 @@ / {
+ 	compatible = "st,stm32f429i-disco", "st,stm32f429";
+ 
+ 	chosen {
+-		bootargs = "root=mtd:romfs rootfstype=romfs ro";
++		bootargs = "root=/dev/mmcblk0p1 rootwait rootfstype=ext2 rw init=/bin/sh";
+ 		stdout-path = "serial0:115200n8";
+ 	};
+ 
+-	flash: flash@08000000 {
+-        compatible = "mtd-rom";
+-        reg = <0x08000000 0x00200000>;
+-        bank-width = <4>;
+-        #address-cells = <1>;
+-
+-        romfs@00180000 {
+-            reg = <0x00180000 0x00080000>;
+-        };
+-    };
+-
+ 	memory@90000000 {
+ 		device_type = "memory";
+ 		reg = <0x90000000 0x800000>;
+-- 
+2.54.0
+
