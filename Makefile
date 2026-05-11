@@ -9,13 +9,16 @@ build-linux:
 	@$(MAKE) -C $(PROJECT_DIR)/buildroot-2026.02-rc2 afboot-stm32-rebuild
 
 build-run:
-	@echo "Rebuilding Linux and afboot-stm32..."
-
-	@$(MAKE) -C $(PROJECT_DIR)/buildroot-2026.02-rc2 linux-rebuild
-	@$(MAKE) -C $(PROJECT_DIR)/buildroot-2026.02-rc2 afboot-stm32-rebuild
-
-	@echo "Running stm32 target..."
+	@$(MAKE) build-linux
 	@$(MAKE) stm32
+
+sd-card:
+	@echo "Write rootfs to sd card"
+
+	@$(MAKE) -C $(PROJECT_DIR)/buildroot-2026.02-rc2 sudo mkfs.ext2 /dev/sdb1
+	@$(MAKE) -C $(PROJECT_DIR)/buildroot-2026.02-rc2 udo dd if=output/images/rootfs.ext2 of=/dev/sdb1 bs=4M conv=fsync status=progress
+	@$(MAKE) -C $(PROJECT_DIR)/buildroot-2026.02-rc2 sync
+	@$(MAKE) -C $(PROJECT_DIR)/buildroot-2026.02-rc2 sudo e2fsck -f /dev/sdb1
 
 qemu:
 	@echo "Run qemu command"
