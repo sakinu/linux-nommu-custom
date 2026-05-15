@@ -1,7 +1,7 @@
 From 74f1f52f5263621a3e148c1f82245f6db484f629 Mon Sep 17 00:00:00 2001
 From: sakinu <sakinu080712345@gmail.com>
 Date: Sun, 10 May 2026 10:00:48 +0800
-Subject: [PATCH 2/4] enable SDIO SD card support
+Subject: [PATCH 2/5] enable SDIO SD card support
 
 ---
  arch/arm/boot/dts/st/stm32f429-disco.dts | 19 +++++++++++++++++++

@@ -1,7 +1,7 @@
 From f795441b56c7b4f82f6e9390891800e6654a6f06 Mon Sep 17 00:00:00 2001
 From: sakinu <sakinu080712345@gmail.com>
 Date: Tue, 12 May 2026 04:22:40 +0800
-Subject: [PATCH 4/4] switch rootfs from flash romfs to SD card ext2
+Subject: [PATCH 4/5] switch rootfs from flash romfs to SD card ext2
 
 ---
  arch/arm/boot/dts/st/stm32f429-disco.dts | 13 +------------

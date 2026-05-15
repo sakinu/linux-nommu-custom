@@ -1,0 +1,208 @@
+From 29366f9f657c206e42a8326f9b78a6608b0b8e5e Mon Sep 17 00:00:00 2001
+From: sakinu <sakinu080712345@gmail.com>
+Date: Sat, 16 May 2026 06:26:04 +0800
+Subject: [PATCH 5/5] fix SDIO/LTDC pin conflict
+
+---
+ arch/arm/boot/dts/st/stm32f4-pinctrl.dtsi | 117 ++++++++++++++--------
+ arch/arm/boot/dts/st/stm32f429-disco.dts  |   2 +-
+ drivers/gpu/drm/stm/ltdc.c                |  23 +++--
+ 3 files changed, 89 insertions(+), 53 deletions(-)
+
+diff --git a/arch/arm/boot/dts/st/stm32f4-pinctrl.dtsi b/arch/arm/boot/dts/st/stm32f4-pinctrl.dtsi
+index 3bb812d63..054a40da4 100644
+--- a/arch/arm/boot/dts/st/stm32f4-pinctrl.dtsi
++++ b/arch/arm/boot/dts/st/stm32f4-pinctrl.dtsi
+@@ -317,50 +317,54 @@ pins {
+ 
+ 			ltdc_pins_b: ltdc-1 {
+ 				pins {
+-					pinmux = <STM32_PINMUX('C', 6,  AF14)>,
+-						/* LCD_HSYNC */
+-						 <STM32_PINMUX('A', 4,  AF14)>,
+-						 /* LCD_VSYNC */
+-						 <STM32_PINMUX('G', 7,  AF14)>,
+-						 /* LCD_CLK */
+-						 <STM32_PINMUX('C', 10, AF14)>,
+-						 /* LCD_R2 */
+-						 <STM32_PINMUX('B', 0,  AF9)>,
+-						 /* LCD_R3 */
+-						 <STM32_PINMUX('A', 11, AF14)>,
+-						 /* LCD_R4 */
+-						 <STM32_PINMUX('A', 12, AF14)>,
+-						 /* LCD_R5 */
+-						 <STM32_PINMUX('B', 1,  AF9)>,
+-						 /* LCD_R6*/
+-						 <STM32_PINMUX('G', 6,  AF14)>,
+-						 /* LCD_R7 */
+-						 <STM32_PINMUX('A', 6,  AF14)>,
+-						 /* LCD_G2 */
+-						 <STM32_PINMUX('G', 10, AF9)>,
+-						 /* LCD_G3 */
+-						 <STM32_PINMUX('B', 10, AF14)>,
+-						 /* LCD_G4 */
+-						 <STM32_PINMUX('D', 6,  AF14)>,
+-						 /* LCD_B2 */
+-						 <STM32_PINMUX('G', 11, AF14)>,
+-						 /* LCD_B3*/
+-						 <STM32_PINMUX('B', 11, AF14)>,
+-						 /* LCD_G5 */
+-						 <STM32_PINMUX('C', 7,  AF14)>,
+-						 /* LCD_G6 */
+-						 <STM32_PINMUX('D', 3,  AF14)>,
+-						 /* LCD_G7 */
+-						 <STM32_PINMUX('G', 12, AF9)>,
+-						 /* LCD_B4 */
+-						 <STM32_PINMUX('A', 3,  AF14)>,
+-						 /* LCD_B5 */
+-						 <STM32_PINMUX('B', 8,  AF14)>,
+-						 /* LCD_B6 */
+-						 <STM32_PINMUX('B', 9,  AF14)>,
+-						 /* LCD_B7 */
+-						 <STM32_PINMUX('F', 10, AF14)>;
+-						 /* LCD_DE */
++					pinmux = <STM32_PINMUX('C', 6,  AF14)>,					 /* LCD_HSYNC */
++						 <STM32_PINMUX('A', 4,  AF14)>,						 /* LCD_VSYNC */
++						 <STM32_PINMUX('G', 7,  AF14)>,						 /* LCD_CLK */
++						 <STM32_PINMUX('C', 10, AF14)>,						 /* LCD_R2 */
++						 <STM32_PINMUX('B', 0,  AF9)>,						 /* LCD_R3 */
++						 <STM32_PINMUX('A', 11, AF14)>,						 /* LCD_R4 */
++						 <STM32_PINMUX('A', 12, AF14)>,						 /* LCD_R5 */
++						 <STM32_PINMUX('B', 1,  AF9)>,						 /* LCD_R6*/
++						 <STM32_PINMUX('G', 6,  AF14)>,						 /* LCD_R7 */
++						 <STM32_PINMUX('A', 6,  AF14)>,						 /* LCD_G2 */
++						 <STM32_PINMUX('G', 10, AF9)>,						 /* LCD_G3 */
++						 <STM32_PINMUX('B', 10, AF14)>,						 /* LCD_G4 */
++						 <STM32_PINMUX('D', 6,  AF14)>,						 /* LCD_B2 */
++						 <STM32_PINMUX('G', 11, AF14)>,						 /* LCD_B3*/
++						 <STM32_PINMUX('B', 11, AF14)>,						 /* LCD_G5 */
++						 <STM32_PINMUX('C', 7,  AF14)>,						 /* LCD_G6 */
++						 <STM32_PINMUX('D', 3,  AF14)>,						 /* LCD_G7 */
++						 <STM32_PINMUX('G', 12, AF9)>,						 /* LCD_B4 */
++						 <STM32_PINMUX('A', 3,  AF14)>,						 /* LCD_B5 */
++						 <STM32_PINMUX('B', 8,  AF14)>,						 /* LCD_B6 */
++						 <STM32_PINMUX('B', 9,  AF14)>,						 /* LCD_B7 */
++						 <STM32_PINMUX('F', 10, AF14)>;					 	 /* LCD_DE */
++					slew-rate = <2>;
++				};
++			};
++
++			ltdc_pins_c: ltdc-2 {
++				pins {
++					pinmux = <STM32_PINMUX('C', 6,  AF14)>,					 /* LCD_HSYNC */
++						 <STM32_PINMUX('A', 4,  AF14)>,						 /* LCD_VSYNC */
++						 <STM32_PINMUX('G', 7,  AF14)>,						 /* LCD_CLK */
++						 <STM32_PINMUX('B', 0,  AF9)>,						 /* LCD_R3 */
++						 <STM32_PINMUX('A', 11, AF14)>,						 /* LCD_R4 */
++						 <STM32_PINMUX('A', 12, AF14)>,						 /* LCD_R5 */
++						 <STM32_PINMUX('B', 1,  AF9)>,						 /* LCD_R6 */
++						 <STM32_PINMUX('G', 6,  AF14)>,						 /* LCD_R7 */
++						 <STM32_PINMUX('A', 6,  AF14)>,						 /* LCD_G2 */
++						 <STM32_PINMUX('G', 10, AF9)>,						 /* LCD_G3 */
++						 <STM32_PINMUX('B', 10, AF14)>,						 /* LCD_G4 */
++						 <STM32_PINMUX('B', 11, AF14)>,						 /* LCD_G5 */
++						 <STM32_PINMUX('C', 7,  AF14)>,						 /* LCD_G6 */
++						 <STM32_PINMUX('D', 3,  AF14)>,						 /* LCD_G7 */
++						 <STM32_PINMUX('G', 11, AF14)>,						 /* LCD_B3*/
++						 <STM32_PINMUX('G', 12, AF9)>,						 /* LCD_B4 */
++						 <STM32_PINMUX('A', 3,  AF14)>,						 /* LCD_B5 */
++						 <STM32_PINMUX('B', 8,  AF14)>,						 /* LCD_B6 */
++						 <STM32_PINMUX('B', 9,  AF14)>,						 /* LCD_B7 */
++						 <STM32_PINMUX('F', 10, AF14)>;						 /* LCD_DE */
+ 					slew-rate = <2>;
+ 				};
+ 			};
+@@ -448,6 +452,31 @@ pins2 {
+ 				};
+ 			};
+ 
++			sdio_pins_1: sdio-pins-1 {		/* 1-bit mode*/
++				pins {
++					pinmux = <STM32_PINMUX('C', 8, AF12)>, /* SDIO_D0 */
++						 <STM32_PINMUX('C', 12, AF12)>, /* SDIO_CK */
++						 <STM32_PINMUX('D', 2, AF12)>; /* SDIO_CMD */
++					drive-push-pull;
++					slew-rate = <2>;
++				};
++			};
++
++			sdio_pins_1_od: sdio-pins-od-1 {		/* 1-bit mode*/
++				pins1 {
++					pinmux = <STM32_PINMUX('C', 8, AF12)>, /* SDIO_D0 */
++						 <STM32_PINMUX('C', 12, AF12)>; /* SDIO_CK */
++					drive-push-pull;
++					slew-rate = <2>;
++				};
++
++				pins2 {
++					pinmux = <STM32_PINMUX('D', 2, AF12)>; /* SDIO_CMD */
++					drive-open-drain;
++					slew-rate = <2>;
++				};
++			};
++
+ 			can1_pins_a: can1-0 {
+ 				pins1 {
+ 					pinmux = <STM32_PINMUX('B', 9, AF9)>; /* CAN1_TX */
+diff --git a/arch/arm/boot/dts/st/stm32f429-disco.dts b/arch/arm/boot/dts/st/stm32f429-disco.dts
+index b972446ce..3dbe0b9d0 100644
+--- a/arch/arm/boot/dts/st/stm32f429-disco.dts
++++ b/arch/arm/boot/dts/st/stm32f429-disco.dts
+@@ -185,7 +185,7 @@ stmpe_adc {
+ 
+ &ltdc {
+ 	status = "okay";
+-	pinctrl-0 = <&ltdc_pins_b>;
++	pinctrl-0 = <&ltdc_pins_c>;
+ 	pinctrl-names = "default";
+ 
+ 	port {
+diff --git a/drivers/gpu/drm/stm/ltdc.c b/drivers/gpu/drm/stm/ltdc.c
+index f7e847cfa..122219199 100644
+--- a/drivers/gpu/drm/stm/ltdc.c
++++ b/drivers/gpu/drm/stm/ltdc.c
+@@ -2079,16 +2079,16 @@ int ltdc_load(struct drm_device *ddev)
+ 		drm_err(ddev, "Failed calling drm_vblank_init()\n");
+ 		goto err;
+ 	}
++    if (IS_ENABLED(CONFIG_PM)) {
++        clk_disable_unprepare(ldev->pixel_clk);
+ 
+-	clk_disable_unprepare(ldev->pixel_clk);
+-
+-	if (ldev->bus_clk)
+-		clk_disable_unprepare(ldev->bus_clk);
++		if (ldev->bus_clk)
++			clk_disable_unprepare(ldev->bus_clk);
+ 
+-	pinctrl_pm_select_sleep_state(ddev->dev);
+-
+-	pm_runtime_enable(ddev->dev);
++        pinctrl_pm_select_sleep_state(ddev->dev);
+ 
++		pm_runtime_enable(ddev->dev);
++	}
+ 	return 0;
+ err:
+ 	clk_disable_unprepare(ldev->pixel_clk);
+@@ -2101,9 +2101,16 @@ int ltdc_load(struct drm_device *ddev)
+ 
+ void ltdc_unload(struct drm_device *ddev)
+ {
++	struct ltdc_device *ldev = ddev->dev_private;
+ 	drm_dbg_driver(ddev, "\n");
+ 
+-	pm_runtime_disable(ddev->dev);
++	if (IS_ENABLED(CONFIG_PM))
++		pm_runtime_disable(ddev->dev);
++    else {
++        clk_disable_unprepare(ldev->pixel_clk);
++        if (ldev->bus_clk)
++            clk_disable_unprepare(ldev->bus_clk);
++    }
+ }
+ 
+ MODULE_AUTHOR("Philippe Cornu <philippe.cornu@st.com>");
+-- 
+2.54.0
+
